@@ -121,20 +121,21 @@ contract VaultGuardiansBase is AStaticTokenData, IVaultData {
      * @param wethAllocationData the allocation data for the WETH vault
      */
     function becomeGuardian(AllocationData memory wethAllocationData) external returns (address) {
-        VaultShares wethVault =
-        new VaultShares(IVaultShares.ConstructorData({
-            asset: i_weth,
-            vaultName: WETH_VAULT_NAME,
-            vaultSymbol: WETH_VAULT_SYMBOL,
-            guardian: msg.sender,
-            allocationData: wethAllocationData,
-            aavePool: i_aavePool,
-            uniswapRouter: i_uniswapV2Router,
-            guardianAndDaoCut: s_guardianAndDaoCut,
-            vaultGuardians: address(this),
-            weth: address(i_weth),
-            usdc: address(i_tokenOne)
-        }));
+        VaultShares wethVault = new VaultShares(
+            IVaultShares.ConstructorData({
+                asset: i_weth,
+                vaultName: WETH_VAULT_NAME,
+                vaultSymbol: WETH_VAULT_SYMBOL,
+                guardian: msg.sender,
+                allocationData: wethAllocationData,
+                aavePool: i_aavePool,
+                uniswapRouter: i_uniswapV2Router,
+                guardianAndDaoCut: s_guardianAndDaoCut,
+                vaultGuardians: address(this),
+                weth: address(i_weth),
+                usdc: address(i_tokenOne)
+            })
+        );
         return _becomeTokenGuardian(i_weth, wethVault);
     }
 
@@ -152,35 +153,37 @@ contract VaultGuardiansBase is AStaticTokenData, IVaultData {
         //slither-disable-next-line uninitialized-local
         VaultShares tokenVault;
         if (address(token) == address(i_tokenOne)) {
-            tokenVault =
-            new VaultShares(IVaultShares.ConstructorData({
-                asset: token,
-                vaultName: TOKEN_ONE_VAULT_NAME,
-                vaultSymbol: TOKEN_ONE_VAULT_SYMBOL,
-                guardian: msg.sender,
-                allocationData: allocationData,
-                aavePool: i_aavePool,
-                uniswapRouter: i_uniswapV2Router,
-                guardianAndDaoCut: s_guardianAndDaoCut,
-                vaultGuardians: address(this),
-                weth: address(i_weth),
-                usdc: address(i_tokenOne)
-            }));
+            tokenVault = new VaultShares(
+                IVaultShares.ConstructorData({
+                    asset: token,
+                    vaultName: TOKEN_ONE_VAULT_NAME,
+                    vaultSymbol: TOKEN_ONE_VAULT_SYMBOL,
+                    guardian: msg.sender,
+                    allocationData: allocationData,
+                    aavePool: i_aavePool,
+                    uniswapRouter: i_uniswapV2Router,
+                    guardianAndDaoCut: s_guardianAndDaoCut,
+                    vaultGuardians: address(this),
+                    weth: address(i_weth),
+                    usdc: address(i_tokenOne)
+                })
+            );
         } else if (address(token) == address(i_tokenTwo)) {
-            tokenVault =
-            new VaultShares(IVaultShares.ConstructorData({
-                asset: token,
-                vaultName: TOKEN_ONE_VAULT_NAME,
-                vaultSymbol: TOKEN_ONE_VAULT_SYMBOL,
-                guardian: msg.sender,
-                allocationData: allocationData,
-                aavePool: i_aavePool,
-                uniswapRouter: i_uniswapV2Router,
-                guardianAndDaoCut: s_guardianAndDaoCut,
-                vaultGuardians: address(this),
-                weth: address(i_weth),
-                usdc: address(i_tokenOne)
-            }));
+            tokenVault = new VaultShares(
+                IVaultShares.ConstructorData({
+                    asset: token,
+                    vaultName: TOKEN_ONE_VAULT_NAME,
+                    vaultSymbol: TOKEN_ONE_VAULT_SYMBOL,
+                    guardian: msg.sender,
+                    allocationData: allocationData,
+                    aavePool: i_aavePool,
+                    uniswapRouter: i_uniswapV2Router,
+                    guardianAndDaoCut: s_guardianAndDaoCut,
+                    vaultGuardians: address(this),
+                    weth: address(i_weth),
+                    usdc: address(i_tokenOne)
+                })
+            );
         } else {
             revert VaultGuardiansBase__NotApprovedToken(address(token));
         }

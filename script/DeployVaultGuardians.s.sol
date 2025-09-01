@@ -16,14 +16,7 @@ contract DeployVaultGuardians is Script {
         vm.startBroadcast();
         VaultGuardianToken vgToken = new VaultGuardianToken(); // mints us the total supply
         VaultGuardianGovernor vgGovernor = new VaultGuardianGovernor(vgToken);
-        VaultGuardians vaultGuardians = new VaultGuardians(
-            aavePool,
-            uniswapRouter,
-            weth,
-            usdc,
-            link, 
-            address(vgToken)
-        );
+        VaultGuardians vaultGuardians = new VaultGuardians(aavePool, uniswapRouter, weth, usdc, link, address(vgToken));
         vaultGuardians.transferOwnership(address(vgGovernor));
         vgToken.transferOwnership(address(vaultGuardians));
         vm.stopBroadcast();
