@@ -1,3 +1,27 @@
+- [High Issues](#high-issues)
+    - [\[H-1\] Potential Token Steal (Due to no access control)](#h-1-potential-token-steal-due-to-no-access-control)
+    - [\[H-2\] Deposit by user in a vault, breaks the invariant by minitng fee shares to both user and DaO and guardian](#h-2-deposit-by-user-in-a-vault-breaks-the-invariant-by-minitng-fee-shares-to-both-user-and-dao-and-guardian)
+    - [\[H-3\] Incorrect Liquidity Input Calculation in `_uniswapInvest` (Misuse of `amounts[0]` → Double Counting Input Tokens)](#h-3-incorrect-liquidity-input-calculation-in-_uniswapinvest-misuse-of-amounts0--double-counting-input-tokens)
+    - [\[H-4\] Unbounded Slippage Parameters (`amountOutMin = 0`, `amountAMin = 0`, `amountBMin = 0`)](#h-4-unbounded-slippage-parameters-amountoutmin--0-amountamin--0-amountbmin--0)
+    - [\[H-5\] Fragile Deadlines (`deadline = block.timestamp`)](#h-5-fragile-deadlines-deadline--blocktimestamp)
+- [Low Issues](#low-issues)
+  - [L-1: Centralization Risk](#l-1-centralization-risk)
+  - [L-2: Unsafe ERC20 Operation](#l-2-unsafe-erc20-operation)
+  - [L-3: Address State Variable Set Without Checks](#l-3-address-state-variable-set-without-checks)
+  - [L-4: `nonReentrant` is Not the First Modifier](#l-4-nonreentrant-is-not-the-first-modifier)
+  - [L-5: PUSH0 Opcode](#l-5-push0-opcode)
+  - [L-6: Unused Error](#l-6-unused-error)
+  - [L-7: Unused State Variable](#l-7-unused-state-variable)
+  - [L-8: Unused Import](#l-8-unused-import)
+  - [L-9: Unchecked Return](#l-9-unchecked-return)
+  - [L-10: Incorrect Event emit](#l-10-incorrect-event-emit)
+- [Gas](#gas)
+  - [G-1: Gas optimizations to avoid reading from storage, when memory reading is possible for the same result](#g-1-gas-optimizations-to-avoid-reading-from-storage-when-memory-reading-is-possible-for-the-same-result)
+  - [G-2: Public Function Not Used Internally](#g-2-public-function-not-used-internally)
+- [Info](#info)
+  - [I-1: Empty interfaces](#i-1-empty-interfaces)
+
+
 ## Issues Found
 
 | Severity | Number of issues found |
@@ -666,7 +690,8 @@ Function returns a value but it is ignored. Consider checking the return value.
 
 </details>
 
-### [L-10] Incorrect Event emit
+
+## L-10: Incorrect Event emit
 
 **Description:**
 Event is emitted with same values twice, when we expect an old and new value in src/protocol/VaultGuardians.sol:updateGuardianStakePrice function
