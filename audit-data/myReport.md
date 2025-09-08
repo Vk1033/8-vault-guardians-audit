@@ -4,6 +4,8 @@
     - [\[H-3\] Incorrect Liquidity Input Calculation in `_uniswapInvest` (Misuse of `amounts[0]` → Double Counting Input Tokens)](#h-3-incorrect-liquidity-input-calculation-in-_uniswapinvest-misuse-of-amounts0--double-counting-input-tokens)
     - [\[H-4\] Unbounded Slippage Parameters (`amountOutMin = 0`, `amountAMin = 0`, `amountBMin = 0`)](#h-4-unbounded-slippage-parameters-amountoutmin--0-amountamin--0-amountbmin--0)
     - [\[H-5\] Fragile Deadlines (`deadline = block.timestamp`)](#h-5-fragile-deadlines-deadline--blocktimestamp)
+- [Medium](#medium)
+    - [\[M-1\] Potentially incorrect voting period and delay in governor may affect governance](#m-1-potentially-incorrect-voting-period-and-delay-in-governor-may-affect-governance)
 - [Low Issues](#low-issues)
   - [L-1: Centralization Risk](#l-1-centralization-risk)
   - [L-2: Unsafe ERC20 Operation](#l-2-unsafe-erc20-operation)
@@ -27,7 +29,7 @@
 | Severity | Number of issues found |
 | -------- | ---------------------- |
 | High     | 5                      |
-| Medium   | 0                      |
+| Medium   | 1                      |
 | Low      | 10                     |
 | Info     | 1                      |
 | Gas      | 2                      |
@@ -363,6 +365,29 @@ uint256 deadline = block.timestamp + 300; // 5 minutes buffer
 ```
 
 Make the buffer configurable so operators can tune it for different environments.
+
+# Medium
+
+### [M-1] Potentially incorrect voting period and delay in governor may affect governance
+
+The `VaultGuardianGovernor` contract, based on [OpenZeppelin Contract's Governor](https://docs.openzeppelin.com/contracts/5.x/api/governance#governor), implements two functions to define the voting delay (`votingDelay`) and period (`votingPeriod`). The contract intends to define a voting delay of 1 day, and a voting period of 7 days. It does it by returning the value `1 days` from `votingDelay` and `7 days` from `votingPeriod`. In Solidity these values are translated to number of seconds.
+
+However, the `votingPeriod` and `votingDelay` functions, by default, are expected to return number of blocks. Not the number seconds. This means that the voting period and delay will be far off what the developers intended, which could potentially affect the intended governance mechanics.
+
+Consider updating the functions as follows:
+
+```diff
+function votingDelay() public pure override returns (uint256) {
+-   return 1 days;
++   return 7200; // 1 day
+}
+
+function votingPeriod() public pure override returns (uint256) {
+-   return 7 days;
++   return 50400; // 1 week
+}
+```
+
 
 # Low Issues
 
