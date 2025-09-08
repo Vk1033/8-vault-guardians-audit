@@ -47,18 +47,22 @@ contract UniswapAdapter is AStaticUSDCData {
         // the element at index 1 is the address of the output token
         s_pathArray = [address(token), address(counterPartyToken)];
 
+        //d, use safeIncreaseAllowance instead of approve
         bool succ = token.approve(address(i_uniswapRouter), amountOfTokenToSwap);
         if (!succ) {
             revert UniswapAdapter__TransferFailed();
         }
         uint256[] memory amounts = i_uniswapRouter.swapExactTokensForTokens({
             amountIn: amountOfTokenToSwap,
+            //d sillpage, sandwich attack possible here
             amountOutMin: 0,
             path: s_pathArray,
             to: address(this),
+            //d deadline set to current block timestamp, manipulation possible here
             deadline: block.timestamp
         });
 
+        //d, use safeIncreaseAllowance instead of approve
         succ = counterPartyToken.approve(address(i_uniswapRouter), amounts[1]);
         if (!succ) {
             revert UniswapAdapter__TransferFailed();
@@ -72,11 +76,14 @@ contract UniswapAdapter is AStaticUSDCData {
         (uint256 tokenAmount, uint256 counterPartyTokenAmount, uint256 liquidity) = i_uniswapRouter.addLiquidity({
             tokenA: address(token),
             tokenB: address(counterPartyToken),
+            //d amount[0] = amountOfTokenToSwap, so its like 2x of what we desired
             amountADesired: amountOfTokenToSwap + amounts[0],
             amountBDesired: amounts[1],
+            //d sillpage, sandwich attack possible here
             amountAMin: 0,
             amountBMin: 0,
             to: address(this),
+            //d deadline set to current block timestamp, manipulation possible here
             deadline: block.timestamp
         });
         emit UniswapInvested(tokenAmount, counterPartyTokenAmount, liquidity);
@@ -95,17 +102,21 @@ contract UniswapAdapter is AStaticUSDCData {
             tokenA: address(token),
             tokenB: address(counterPartyToken),
             liquidity: liquidityAmount,
+            //d sillpage, sandwich attack possible here
             amountAMin: 0,
             amountBMin: 0,
             to: address(this),
+            //d deadline set to current block timestamp, manipulation possible here
             deadline: block.timestamp
         });
         s_pathArray = [address(counterPartyToken), address(token)];
         uint256[] memory amounts = i_uniswapRouter.swapExactTokensForTokens({
             amountIn: counterPartyTokenAmount,
+            //d sillpage, sandwich attack possible here
             amountOutMin: 0,
             path: s_pathArray,
             to: address(this),
+            //d deadline set to current block timestamp, manipulation possible here
             deadline: block.timestamp
         });
         emit UniswapDivested(tokenAmount, amounts[1]);

@@ -29,7 +29,7 @@ contract AaveAdapter {
         i_aavePool.supply({
             asset: address(asset),
             amount: amount,
-            //i is address(this) vault or this adapter contract?
+            //d is address(this) vault or this adapter contract? yes vault
             onBehalfOf: address(this), // decides who get's Aave's aTokens for the investment. In this case, mint it to the vault
             referralCode: 0
         });

@@ -120,6 +120,7 @@ contract VaultGuardiansBase is AStaticTokenData, IVaultData {
      * 
      * @param wethAllocationData the allocation data for the WETH vault
      */
+    //d, payable func for sending eth?? , nahh all good, uniswap/aave only handles ERC20 so has to be weth
     function becomeGuardian(AllocationData memory wethAllocationData) external returns (address) {
         VaultShares wethVault = new VaultShares(
             IVaultShares.ConstructorData({
@@ -172,6 +173,7 @@ contract VaultGuardiansBase is AStaticTokenData, IVaultData {
             tokenVault = new VaultShares(
                 IVaultShares.ConstructorData({
                     asset: token,
+                    //a Name should be of TWO
                     vaultName: TOKEN_ONE_VAULT_NAME,
                     vaultSymbol: TOKEN_ONE_VAULT_SYMBOL,
                     guardian: msg.sender,
@@ -271,6 +273,7 @@ contract VaultGuardiansBase is AStaticTokenData, IVaultData {
     function _becomeTokenGuardian(IERC20 token, VaultShares tokenVault) private returns (address) {
         s_guardians[msg.sender][token] = IVaultShares(address(tokenVault));
         emit GuardianAdded(msg.sender, token);
+        //d, what is happening?, all good here
         i_vgToken.mint(msg.sender, s_guardianStakePrice);
         token.safeTransferFrom(msg.sender, address(this), s_guardianStakePrice);
         bool succ = token.approve(address(tokenVault), s_guardianStakePrice);

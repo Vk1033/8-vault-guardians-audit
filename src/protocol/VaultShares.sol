@@ -65,6 +65,7 @@ contract VaultShares is ERC4626, IVaultShares, AaveAdapter, UniswapAdapter, Reen
     /**
      * @notice removes all supplied liquidity from Uniswap and supplied lending amount from Aave and then re-invests it back into them only if the vault is active
      */
+    //d why we need to do this?, to gte value of underlying asset at that time to withdraw or redeem
     modifier divestThenInvest() {
         uint256 uniswapLiquidityTokensBalance = i_uniswapLiquidityToken.balanceOf(address(this));
         uint256 aaveAtokensBalance = i_aaveAToken.balanceOf(address(this));
@@ -103,6 +104,7 @@ contract VaultShares is ERC4626, IVaultShares, AaveAdapter, UniswapAdapter, Reen
         updateHoldingAllocation(constructorData.allocationData);
 
         // External calls
+        //d check these again with orginal contracts, they are good prolly
         i_aaveAToken =
             IERC20(IPool(constructorData.aavePool).getReserveData(address(constructorData.asset)).aTokenAddress);
         i_uniswapLiquidityToken = IERC20(i_uniswapFactory.getPair(address(constructorData.asset), address(i_weth)));
@@ -121,6 +123,7 @@ contract VaultShares is ERC4626, IVaultShares, AaveAdapter, UniswapAdapter, Reen
      * @notice Allows Vault Guardians to update their allocation ratio (and thus, their strategy of investment)
      * @param tokenAllocationData The new allocation data
      */
+    //d check for allocation precision, yes sums upto 1
     function updateHoldingAllocation(AllocationData memory tokenAllocationData) public onlyVaultGuardians isActive {
         uint256 totalAllocation = tokenAllocationData.holdAllocation + tokenAllocationData.uniswapAllocation
             + tokenAllocationData.aaveAllocation;
@@ -137,6 +140,7 @@ contract VaultShares is ERC4626, IVaultShares, AaveAdapter, UniswapAdapter, Reen
      * @notice Mints shares to the DAO and the guardian as a fee
      */
     // slither-disable-start reentrancy-eth
+
     function deposit(uint256 assets, address receiver)
         public
         override(ERC4626, IERC4626)
@@ -148,9 +152,19 @@ contract VaultShares is ERC4626, IVaultShares, AaveAdapter, UniswapAdapter, Reen
             revert VaultShares__DepositMoreThanMax(assets, maxDeposit(receiver));
         }
 
+        // uint256 totalShares = previewDeposit(assets);
+        // uint256 fee = totalShares / i_guardianAndDaoCut; // or however you want to split
+        // uint256 userShares = totalShares - 2 * fee; // net after fees
+
+        // _deposit(_msgSender(), receiver, assets, userShares);
+
+        // _mint(i_guardian, fee);
+        // _mint(i_vaultGuardians, fee);
+
         uint256 shares = previewDeposit(assets);
         _deposit(_msgSender(), receiver, assets, shares);
 
+        //d shouldnt Dao and guardian shares be substracted? from receiver's shares? exactly its a medium
         _mint(i_guardian, shares / i_guardianAndDaoCut);
         _mint(i_vaultGuardians, shares / i_guardianAndDaoCut);
 
@@ -178,6 +192,8 @@ contract VaultShares is ERC4626, IVaultShares, AaveAdapter, UniswapAdapter, Reen
      * @notice Anyone can call this and pay the gas costs to rebalance the portfolio at any time. 
      * @dev We understand that this is horrible for gas costs. 
      */
+    //d, why we need to do this? +> make the allocation changged , so to rebalance
+    //d, non reentrancy guard at the not not of any use
     function rebalanceFunds() public isActive divestThenInvest nonReentrant {}
 
     /**
@@ -186,6 +202,8 @@ contract VaultShares is ERC4626, IVaultShares, AaveAdapter, UniswapAdapter, Reen
      * We first divest our assets so we get a good idea of how many assets we hold.
      * Then, we redeem for the user, and automatically reinvest.
      */
+    //d, why divest and invest, and not only divest as is natspec? its a modifier
+    //d non reentrancy guard at the not not of any use
     function withdraw(uint256 assets, address receiver, address owner)
         public
         override(IERC4626, ERC4626)

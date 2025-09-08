@@ -12,6 +12,8 @@ import {VaultGuardianGovernor} from "../../../src/dao/VaultGuardianGovernor.sol"
 import {VaultGuardianToken} from "../../../src/dao/VaultGuardianToken.sol";
 import {console} from "forge-std/console.sol";
 
+import {IVaultShares} from "../../../src/interfaces/IVaultShares.sol";
+
 contract VaultGuardiansBaseTest is Base_Test {
     address public guardian = makeAddr("guardian");
     address public user = makeAddr("user");
@@ -42,6 +44,18 @@ contract VaultGuardiansBaseTest is Base_Test {
         guardianAndDaoCut = vaultGuardians.getGuardianAndDaoCut();
         stakePrice = vaultGuardians.getGuardianStakePrice();
     }
+
+    ///////////////////
+    // Audit //////////
+    ///////////////////
+
+    function test_guardianHasNonWethVaults() public hasGuardian {
+        // assert(IVaultShares(address(0)), address(0));
+    }
+
+    //////////////////
+    /////////////////
+    /////////////////
 
     function testDefaultsToNonFork() public view {
         assert(block.chainid != 1);

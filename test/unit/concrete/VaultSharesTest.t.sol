@@ -2,7 +2,7 @@
 pragma solidity 0.8.20;
 
 import {Base_Test} from "../../Base.t.sol";
-import {console} from "forge-std/console.sol";
+import "forge-std/console.sol";
 import {VaultShares} from "../../../src/protocol/VaultShares.sol";
 import {ERC20Mock} from "../../mocks/ERC20Mock.sol";
 import {VaultShares, IERC20} from "../../../src/protocol/VaultShares.sol";
@@ -128,6 +128,65 @@ contract VaultSharesTest is Base_Test {
 
         assert(wethVaultShares.balanceOf(guardian) > startingGuardianBalance);
         assert(wethVaultShares.balanceOf(address(vaultGuardians)) > startingDaoBalance);
+    }
+
+    function testUserDepositBreaksInvairant() public hasGuardian {
+        weth.mint(mintAmount, user);
+        vm.startPrank(user);
+        console.log(wethVaultShares.totalSupply());
+        weth.approve(address(wethVaultShares), mintAmount);
+
+        uint256 startingUserBalance = wethVaultShares.balanceOf(user);
+        uint256 startingGuardianBalance = wethVaultShares.balanceOf(guardian);
+        uint256 startingDaoBalance = wethVaultShares.balanceOf(address(vaultGuardians));
+
+        wethVaultShares.deposit(mintAmount, user);
+
+        uint256 expectedTotalShares = wethVaultShares.previewDeposit(mintAmount);
+
+        uint256 userShares = wethVaultShares.balanceOf(user) - startingUserBalance;
+        uint256 guardianShares = wethVaultShares.balanceOf(guardian) - startingGuardianBalance;
+        uint256 daoShares = wethVaultShares.balanceOf(address(vaultGuardians)) - startingDaoBalance;
+
+        emit log_named_uint("expectedTotalShares", expectedTotalShares);
+        emit log_named_uint("userShares", userShares);
+        emit log_named_uint("guardianShares", guardianShares);
+        emit log_named_uint("daoShares", daoShares);
+
+        uint256 expectedDaoAndGuardianShares = expectedTotalShares / defaultGuardianAndDaoCut;
+        emit log_named_uint("expectedDaoAndGuardianShares", expectedDaoAndGuardianShares);
+
+        uint256 totalShares = userShares + guardianShares + daoShares;
+
+        assert(wethVaultShares.balanceOf(guardian) > startingGuardianBalance);
+        assert(wethVaultShares.balanceOf(address(vaultGuardians)) > startingDaoBalance);
+
+        assertLt(expectedTotalShares, totalShares);
+    }
+
+    function testDepositMintsMoreThanPreviewDeposit() public hasGuardian {
+        weth.mint(mintAmount, user);
+        vm.startPrank(user);
+
+        weth.approve(address(wethVaultShares), mintAmount);
+
+        // previewDeposit should tell us how many shares will be minted for user
+        uint256 previewShares = wethVaultShares.previewDeposit(mintAmount);
+
+        uint256 supplyBefore = wethVaultShares.totalSupply();
+        wethVaultShares.deposit(mintAmount, user);
+        uint256 supplyAfter = wethVaultShares.totalSupply();
+
+        uint256 actualMinted = supplyAfter - supplyBefore;
+
+        emit log_named_uint("previewDepositShares", previewShares);
+        emit log_named_uint("actualMintedShares", actualMinted);
+        emit log_named_uint("difference", actualMinted - previewShares);
+        emit log_named_uint("daoAndGuardianShares", actualMinted / defaultGuardianAndDaoCut * 2);
+        emit log_named_uint("expectedDaoAndGuardianShares", previewShares / defaultGuardianAndDaoCut * 2);
+
+        // ✅ Show the bug: more shares are minted than previewDeposit predicts
+        assertGt(actualMinted, previewShares);
     }
 
     modifier userIsInvested() {

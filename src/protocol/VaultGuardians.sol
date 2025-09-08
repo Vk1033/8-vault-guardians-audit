@@ -68,8 +68,11 @@ contract VaultGuardians is Ownable, VaultGuardiansBase {
      * @notice Updates the stake price for guardians. 
      * @param newStakePrice The new stake price in wei
      */
+
+    //d what happended to guardians that already in protocol with prev stake price, they continue with old price
     function updateGuardianStakePrice(uint256 newStakePrice) external onlyOwner {
         s_guardianStakePrice = newStakePrice;
+        //d gas user newStakePrice instead of storage
         emit VaultGuardians__UpdatedStakePrice(s_guardianStakePrice, newStakePrice);
     }
 
@@ -79,8 +82,10 @@ contract VaultGuardians is Ownable, VaultGuardiansBase {
      * @dev this value will be divided by the number of shares whenever a user deposits into a vault
      * @dev historical vaults will not have their cuts updated, only vaults moving forward
      */
+    //d how much to guardian and Dao? 1% for each
     function updateGuardianAndDaoCut(uint256 newCut) external onlyOwner {
         s_guardianAndDaoCut = newCut;
+        //d gas user newCut instead of storage
         emit VaultGuardians__UpdatedStakePrice(s_guardianAndDaoCut, newCut);
     }
 
@@ -90,6 +95,8 @@ contract VaultGuardians is Ownable, VaultGuardiansBase {
      * @dev Since this is owned by the DAO, the funds will always go to the DAO. 
      * @param asset The ERC20 to sweep
      */
+
+    //d not access control?, also it will get all the tokens and not just excess
     function sweepErc20s(IERC20 asset) external {
         uint256 amount = asset.balanceOf(address(this));
         emit VaultGuardians__SweptTokens(address(asset));

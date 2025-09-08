@@ -58,4 +58,20 @@ contract VaultGuardiansTest is Base_Test {
 
         assertEq(balanceAfter - balanceBefore, mintAmount);
     }
+
+    function testSweepErc20sbyAnyone() public {
+        ERC20Mock mock = new ERC20Mock();
+        mock.mint(mintAmount, msg.sender);
+        vm.prank(msg.sender);
+        mock.transfer(address(vaultGuardians), mintAmount);
+
+        uint256 balanceBefore = mock.balanceOf(address(vaultGuardianGovernor));
+
+        vm.prank(user);
+        vaultGuardians.sweepErc20s(IERC20(mock));
+
+        uint256 balanceAfter = mock.balanceOf(address(vaultGuardianGovernor));
+
+        assertEq(balanceAfter - balanceBefore, mintAmount);
+    }
 }

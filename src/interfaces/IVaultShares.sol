@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-//i, whats 4626
+//d, whats 4626
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {IVaultData} from "./IVaultData.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
